@@ -1,9 +1,8 @@
-package com.sp.taxireservationsystem.jwtConfig;
+package com.sp.taxireservationsystem.jwt.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +15,7 @@ import java.util.function.Function;
 public class JwtTokenUtil {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
-
-    @Value("${jwt.secret}")
-    private String secret;
+    public static final String SECRET = "javainuse";
 
     //token 으로 JWT subject(사용자 명) or null 반환
     public String getUsernameFromToken(String token) {
@@ -38,7 +35,10 @@ public class JwtTokenUtil {
 
     //JWT 에 사용하는 secret key + token 확인하여 JWT body 반환
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     //토큰의 만료 시간 체크
@@ -55,9 +55,13 @@ public class JwtTokenUtil {
 
     //실제 토큰 생성
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
+                .signWith(SignatureAlgorithm.HS512, SECRET)
+                .compact();
     }
 
     //토큰 존재 유무 && 토큰 만료 체크

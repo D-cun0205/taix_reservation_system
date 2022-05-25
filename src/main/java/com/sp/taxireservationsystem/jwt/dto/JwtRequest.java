@@ -1,4 +1,4 @@
-package com.sp.taxireservationsystem.jwtConfig;
+package com.sp.taxireservationsystem.jwt.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

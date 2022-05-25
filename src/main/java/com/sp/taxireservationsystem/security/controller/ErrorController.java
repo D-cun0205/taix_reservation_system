@@ -1,4 +1,4 @@
-package com.sp.taxireservationsystem.error;
+package com.sp.taxireservationsystem.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
