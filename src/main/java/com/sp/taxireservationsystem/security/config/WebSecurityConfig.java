@@ -40,10 +40,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //token 인증으로 요청 위조 disabled
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/authenticate")
-                    .permitAll()
-                .anyRequest()
-                    .authenticated()
+                    .antMatchers("/authenticate", "/register").permitAll()
+                    .anyRequest().authenticated()
             .and()
                 //SessionCreationPolicy.STATELESS : 스프링 시큐리티가 세션을 생성하지 않고 세션이 있어도 사용하지 않음
                 .sessionManagement()

@@ -1,15 +1,16 @@
 package com.sp.taxireservationsystem.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountDto {
 
-    private String email;
+    private String name;
     private String password;
-    private String username;
+    private String mail;
+
 }
