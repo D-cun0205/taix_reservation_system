@@ -6,6 +6,7 @@ import com.sp.taxireservationsystem.jwt.config.JwtUtil;
 import com.sp.taxireservationsystem.jwt.dto.JwtRequest;
 import com.sp.taxireservationsystem.jwt.dto.JwtResponse;
 import com.sp.taxireservationsystem.jwt.service.JwtUserDetailsService;
+import com.sp.taxireservationsystem.redis.service.RedisService;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,20 +27,24 @@ public class JwtAuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtTokenUtil;
     private final JwtUserDetailsService userDetailsService;
+    private final RedisService redisService;
 
     public JwtAuthenticationController(AuthenticationManager authenticationManager,
                                        JwtUtil jwtTokenUtil,
-                                       JwtUserDetailsService userDetailsService) {
+                                       JwtUserDetailsService userDetailsService,
+                                       RedisService redisService) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userDetailsService = userDetailsService;
+        this.redisService = redisService;
     }
 
     @PostMapping(value = "/authenticate")
     public ResponseEntity<JwtResponse> createAuthenticationToken(@RequestBody JwtRequest jwtRequest) {
-        authenticate(jwtRequest.getUsername(), jwtRequest.getPassword());
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequest.getUsername());
+        authenticate(jwtRequest.getName(), jwtRequest.getPassword());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequest.getName());
         final String token = jwtTokenUtil.generateToken(userDetails);
+        redisService.setValues(token, userDetails.getUsername());
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
@@ -49,7 +54,7 @@ public class JwtAuthenticationController {
     }
 
     @GetMapping(value = "refreshtoken")
-    public ResponseEntity<?> refreshtoken(HttpServletRequest request) throws Exception {
+    public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
         DefaultClaims claims = (DefaultClaims) request.getAttribute("claims");
         Map<String, Object> expectedMap = getMapFromIoJsonwebtokenClaims(claims);
         String token = jwtTokenUtil.doGenerateRefreshToken(expectedMap, expectedMap.get("sub").toString());
@@ -64,9 +69,9 @@ public class JwtAuthenticationController {
         return expectedMap;
     }
 
-    private void authenticate(String username, String password) throws DisabledException, BadCredentialsException {
+    private void authenticate(String name, String password) throws DisabledException, BadCredentialsException {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(name, password));
         } catch (DisabledException e) {
             throw new DisabledException("Disabled", e);
         } catch (BadCredentialsException e) {

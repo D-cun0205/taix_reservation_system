@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain) throws ServletException, IOException {
         try {
             String jwtToken = extractJwtFromRequest(request);
-            if (StringUtils.hasText(jwtToken) && Boolean.TRUE.equals(jwtUtil.validateToken(jwtToken))) {
+            if (StringUtils.hasText(jwtToken) && jwtUtil.validateToken(jwtToken)) {
                 UserDetails userDetails = new User(
                         jwtUtil.getUsernameFromToken(jwtToken), "", jwtUtil.getRolesFromToken(jwtToken));
 
